@@ -36,4 +36,24 @@ python -m PyInstaller --noconfirm --clean --onedir --windowed `
     main.py
 if ($LASTEXITCODE -ne 0) { throw 'EXE build failed.' }
 
+$previousDiagFile = $env:TEAMS_AUTOJOIN_DIAG_FILE
+try {
+    $env:TEAMS_AUTOJOIN_DIAG_FILE = Join-Path $PSScriptRoot ('.build-release\self-test-' + [guid]::NewGuid().ToString('N') + '.txt')
+    $check = Start-Process -FilePath (Join-Path $PSScriptRoot 'release\TeamsAutoJoin\TeamsAutoJoin.exe') `
+        -ArgumentList '--self-test' -WindowStyle Hidden -PassThru
+    if (-not $check.WaitForExit(30000)) {
+        Stop-Process -Id $check.Id
+        throw 'Packaged EXE self-test timed out. The build is not ready to use.'
+    }
+    $check.Refresh()
+    if ($check.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $env:TEAMS_AUTOJOIN_DIAG_FILE)) {
+        throw "Packaged EXE self-test failed. Check $env:TEAMS_AUTOJOIN_DIAG_FILE"
+    }
+    if ((Get-Content -LiteralPath $env:TEAMS_AUTOJOIN_DIAG_FILE -Raw).Trim() -ne 'OK') {
+        throw "Packaged EXE self-test failed. Check $env:TEAMS_AUTOJOIN_DIAG_FILE"
+    }
+} finally {
+    $env:TEAMS_AUTOJOIN_DIAG_FILE = $previousDiagFile
+}
+
 Write-Host "Output: $PSScriptRoot\release\TeamsAutoJoin\TeamsAutoJoin.exe"

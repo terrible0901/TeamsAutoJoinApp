@@ -1,11 +1,8 @@
 # Teams 自動入退室アプリの使い方
 
 ## 起動
-ターミナルで以下のコマンドを実行してください
-```powershell
-python -m pip install --target .deps -r requirements.txt
-```
 Windows 11で `release\TeamsAutoJoin\TeamsAutoJoin.exe` を起動します。
+EXE版はPythonのインストールやpipの実行は不要です。コピーする場合は、同じ場所にある `_internal` を含めて `TeamsAutoJoin` フォルダー全体をコピーしてください。
 初回起動時は自動運転が一時停止しています。
 
 ソースから起動する場合はPython 3.14を用意し、作業フォルダーで次を実行します。
@@ -16,6 +13,9 @@ python main.py
 ```
 
 EXEの再作成は `powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1` で行います。
+ビルド後はEXEの自己診断を実行し、正常終了を確認します。出力先は `release` です。`dist` に残った古いビルドは使用しないでください。
+
+`Failed to import encodings module` が表示される場合は、同梱ファイルの欠落・破損が考えられます。`_internal\base_library.zip` を含むフォルダー全体を正常なビルドから置き換えてください。
 
 ## 予約
 
